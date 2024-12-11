@@ -1,0 +1,47 @@
+# image will be published to ghcr.io/<user>/<name>
+name: bluetile
+
+# description will be included in the image's metadata
+description: QTile built upon ublue
+
+# the base image to build on top of (FROM) and the version tag to use
+base-image: ghcr.io/ublue-os/base-main
+image-version: 40 # latest is also supported if you want new updates ASAP
+
+# module configuration, executed in order
+# you can include multiple instances of the same module
+modules:
+  - from-file: components/fonts.yml
+  - from-file: components/common-rpms.yml
+  - from-file: components/qtile-rpms.yml
+  - from-file: components/sddm.yml
+  - from-file: components/flatpaks.yml
+
+  - type: files
+    files:
+      - source: systemd
+        destination: /etc/systemd
+      - source: etc
+        destination: /etc
+   
+  - type: default-flatpaks
+    notify: true
+    system:
+      remove:
+        - org.gnome.Calculator
+        - org.gnome.Characters
+        - org.gnome.Calendar
+        - org.gnome.Loupe
+        - org.gnome.NautilusPreviewer
+        - io.missioncenter.MissionCenter
+        - org.gnome.Weather 
+        - org.gnome.font-viewer
+        - org.gnome.clocks
+        - com.mattjakeman.ExtensionManager
+
+  - type: rpm-ostree
+    remove:
+      - firefox
+      - firefox-langpacks
+
+  - type: signing # this sets up the proper policy & signing files for signed images to work fully
